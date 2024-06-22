@@ -1,0 +1,134 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ItemType {
+  CAR
+  HOUSE
+  COURT
+}
+
+model Store {
+  id       Int     @unique @default(autoincrement())
+  name     String
+  cnpj     String  @unique
+  imgUrl   String?
+  email    String  @unique
+  password String
+
+  address       Address?
+  operationHour OperationHour[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stores")
+}
+
+model Address {
+  id           Int    @unique @default(autoincrement())
+  street       String
+  neighborhood String
+  zipCode      Int
+  city         String
+  uf           String
+  number       Int
+
+  storeId Int   @unique
+  store   Store @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  @@map("adresses")
+}
+
+model OperationHour {
+  id                  Int                   @unique @default(autoincrement())
+  open                String
+  close               String
+  relDayWeekOperation relDayWeekOperation[]
+
+  store   Store? @relation(fields: [storeId], references: [id])
+  storeId Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("operatingHours")
+}
+
+model relDayWeekOperation {
+  id              Int           @unique @default(autoincrement())
+  operationHourId Int
+  dayWeekId       Int
+  dayWeek         DayWeek       @relation(fields: [dayWeekId], references: [id])
+  operationHour   OperationHour @relation(fields: [operationHourId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("relDayWeekOperation")
+}
+
+model DayWeek {
+  id                  Int                   @unique @default(autoincrement())
+  day                 String                @unique
+  index               Int                   @unique
+  relDayWeekOperation relDayWeekOperation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("daysWeek")
+}
+
+model SchedulableItem {
+  id                 Int          @unique @default(autoincrement())
+  name               String
+  description        String?
+  type               ItemType
+  specificAttributes Json?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  Scheduling         Scheduling[]
+
+  @@map("schedulableItems")
+}
+
+model Client {
+  id        Int      @unique @default(autoincrement())
+  name      String
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Scheduling Scheduling[]
+
+  @@map("clients")
+}
+
+model Scheduling {
+  id                Int             @unique @default(autoincrement())
+  date              String
+  startTime         String
+  endTime           String
+  ownerScheduled    String
+  itemSchedulableId Int
+  itemSchedulable   SchedulableItem @relation(fields: [itemSchedulableId], references: [id])
+  clientId          Int?
+  client            Client?         @relation(fields: [clientId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("scheduling")
+}
