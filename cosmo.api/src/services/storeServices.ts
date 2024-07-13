@@ -6,10 +6,11 @@ import { CustomError } from '../helper/customError';
 import { objectHelper } from '../helper/objectHelper';
 
 class StoreServices {
-  async save(store: ICreateStore) {
+  async save(store: ICreateStore, img: Buffer) {
     try {
       store.password = await cryptHelper.encrypt(store.password);
 
+      store.img = [img];
       const res = await dbCosmo.store.create({ data: store });
 
       return res;

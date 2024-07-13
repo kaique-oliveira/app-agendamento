@@ -23,7 +23,7 @@ model Store {
   id       Int     @unique @default(autoincrement())
   name     String
   cnpj     String  @unique
-  imgUrl   String?
+  img      Bytes[]
   email    String  @unique
   password String
 

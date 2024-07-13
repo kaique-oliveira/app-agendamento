@@ -3,23 +3,7 @@ import z, { ZodError } from 'zod';
 
 import { storeServices } from '../services/storeServices';
 import { CustomError } from '../helper/customError';
-
-const createSchema = z.object({
-  name: z
-    .string({ message: 'o nome deve ser um texto.' })
-    .min(4, { message: 'o nome é um campo obrigatório.' }),
-  cnpj: z
-    .string({ message: 'o CNPJ deve ser um texto.' })
-    .min(4, { message: 'o CNPJ é um campo obrigatório.' }),
-  imgUrl: z.string().nullable(),
-  email: z
-    .string()
-    .email({ message: 'o e-mail está inválido.' })
-    .min(8, { message: 'o e-mail é um campo obrigatório.' }),
-  password: z
-    .string({ message: 'a senha deve ser um texto.' })
-    .min(8, { message: 'A senha é um campo obrigatório.' }),
-});
+import { ICreateStore } from '../interfaces';
 
 const updateSchema = z.object({
   name: z
@@ -35,8 +19,45 @@ const updateSchema = z.object({
     .min(8, { message: 'O e-mail é um campo obrigatório.' }),
 });
 
+const createSchema = z.object({
+  name: z
+    .string({ message: 'o nome deve ser um texto.' })
+    .min(4, { message: 'o nome é um campo obrigatório.' }),
+  cnpj: z
+    .string({ message: 'o CNPJ deve ser um texto.' })
+    .min(4, { message: 'o CNPJ é um campo obrigatório.' }),
+  img: z
+    .object({
+      buffer: z.instanceof(Buffer),
+      originalname: z.string(),
+    })
+    .optional(),
+  email: z
+    .string()
+    .email({ message: 'o e-mail está inválido.' })
+    .min(8, { message: 'o e-mail é um campo obrigatório.' }),
+  password: z
+    .string({ message: 'a senha deve ser um texto.' })
+    .min(8, { message: 'A senha é um campo obrigatório.' }),
+});
+
+interface UploadRequest extends Request {
+  body: {
+    name: string;
+    cnpj: string;
+    email: string;
+    senha: string;
+  };
+  img: {
+    buffer: Buffer;
+    originalname: string;
+  };
+}
+
 class StoreController {
   async postStore(req: Request, res: Response) {
+    const file = req.file?.buffer;
+
     try {
       const validation = createSchema.safeParse(req.body);
 
@@ -44,18 +65,10 @@ class StoreController {
         throw validation.error;
       }
 
-      if (validation.data.imgUrl) {
-        const isUrl = z
-          .string()
-          .url({ message: 'URL da imagem inválida.' })
-          .safeParse(validation.data.imgUrl);
-
-        if (isUrl.error) {
-          throw isUrl.error;
-        }
-      }
-
-      const response = await storeServices.save(validation.data);
+      const response = await storeServices.save(
+        validation.data as ICreateStore,
+        file!,
+      );
 
       res.status(201).json(response);
     } catch (error) {

@@ -10,7 +10,6 @@ class AuthHelper {
           name: store.name,
           cnpj: store.cnpj,
           email: store.email,
-          imgUrl: store.imgUrl,
         },
         process.env.JWT_SECRET as string,
         { expiresIn: '7d' },
@@ -26,16 +25,47 @@ class AuthHelper {
       let isValided = false;
 
       if (token) {
-        jwt.verify(token, process.env.JWT_SECRET as string, (err) => {
-          if (err) {
-            console.log('erro', err);
-          } else {
-            isValided = true;
-          }
-        });
+        const payload = jwt.verify(
+          token,
+          process.env.JWT_SECRET as string,
+          (err) => {
+            if (err) {
+              console.log('erro', err);
+            } else {
+              isValided = true;
+            }
+          },
+        );
       }
 
       return isValided;
+    } catch (error) {
+      throw new CustomError(error as string, 400);
+    }
+  }
+  async getPayload(token: string) {
+    try {
+      if (token) {
+        type PayloadType = {
+          name: string;
+          cnpj: string;
+          email: string;
+        };
+
+        try {
+          const payload: PayloadType | void = jwt.verify(
+            token,
+            process.env.JWT_SECRET as string,
+            (err) => {},
+          );
+
+          return payload;
+        } catch (error) {
+          return {};
+        }
+      }
+
+      return {};
     } catch (error) {
       throw new CustomError(error as string, 400);
     }

@@ -22,7 +22,13 @@ class AuthServices {
 
       const token = await authHelper.createToken(store);
 
-      return token;
+      return {
+        token,
+        name: store.name,
+        email: store.email,
+        cnpj: store.cnpj,
+        img: store.img,
+      };
     } catch (error) {
       throw error;
     }

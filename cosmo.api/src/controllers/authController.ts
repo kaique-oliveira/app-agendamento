@@ -31,7 +31,7 @@ class AuthController {
 
       const response = await authServices.login(email, password);
 
-      res.status(200).json({ token: response });
+      res.status(200).json(response);
     } catch (error) {
       const err = error as CustomError;
 
@@ -48,7 +48,6 @@ class AuthController {
 
       const response = await authHelper.validateToken(token);
 
-      console.log(response);
       res.status(200).json({ token: token, isValid: response });
     } catch (error) {
       const err = error as CustomError;
