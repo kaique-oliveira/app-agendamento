@@ -15,6 +15,7 @@ class SchedulingServices {
           scheduling.date,
           scheduling.startTime,
           scheduling.endTime,
+          itemId,
         )
       ) {
         const res = await dbCosmo.scheduling.create({
@@ -61,6 +62,7 @@ class SchedulingServices {
           scheduling.date,
           scheduling.startTime,
           scheduling.endTime,
+          itemId,
         )
       ) {
         const res = await dbCosmo.scheduling.update({
@@ -87,7 +89,12 @@ class SchedulingServices {
       throw new CustomError('erro ao tentar salvar o agendamento.', 502);
     }
   }
-  async checkScheduling(date: string, startTime: string, endTime: string) {
+  async checkScheduling(
+    date: string,
+    startTime: string,
+    endTime: string,
+    itemId: number,
+  ) {
     try {
       let schedule = await dbCosmo.scheduling.findFirst({
         where: {
@@ -98,6 +105,7 @@ class SchedulingServices {
           endTime: {
             gte: endTime, // horaFim do agendamento é maior ou igual à hora de fim passada
           },
+          itemSchedulable: { id: Number(itemId) },
         },
       });
 
@@ -114,6 +122,7 @@ class SchedulingServices {
           endTime: {
             lte: endTime, // horaInicio do agendamento é menor ou igual à hora de início passada
           },
+          itemSchedulable: { id: Number(itemId) },
         },
       });
 
@@ -130,6 +139,7 @@ class SchedulingServices {
           endTime: {
             gt: startTime, // horaFim do agendamento é maior
           },
+          itemSchedulable: { id: Number(itemId) },
         },
       });
 

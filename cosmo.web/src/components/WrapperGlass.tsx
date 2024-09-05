@@ -1,35 +1,36 @@
-import { Flex } from '@chakra-ui/react';
+import { motion, MotionProps } from 'framer-motion';
 import React from 'react';
+import styled from 'styled-components';
 
-type WrapperGlassType = React.HTMLAttributes<HTMLDivElement>;
+type WrapperGlassType = React.HTMLAttributes<HTMLDivElement> & MotionProps;
+
+const Wrapper = styled(motion.div)`
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+
+  background-color: rgb(0, 0, 0, 0.06);
+  backdrop-filter: blur(3px);
+`;
 
 export default function WrapperGlass({ ...rest }: WrapperGlassType) {
   return (
-    <Flex
+    <Wrapper
       {...rest}
-      w="100vw"
-      h={'100vh'}
-      position="fixed"
-      top={0}
-      left={0}
-      alignItems="center"
-      justifyContent="center"
-      zIndex={200}
-      style={{
-        backgroundColor: 'rgb(0,0,0, .06)',
-        backdropFilter: 'blur(3px)',
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{
+        duration: 0.2,
       }}
-    >
-      {/* <Spinner
-        shadow="0px 0px 8px rgb(0,0,0, .1)"
-        colorScheme="purple"
-        mt="56px"
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="purple"
-        size="xl"
-      /> */}
-    </Flex>
+    />
   );
 }

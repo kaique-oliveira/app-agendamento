@@ -4,6 +4,7 @@ import { ICreateStore, ISelectStore, IUpdateStore } from '../interfaces';
 import dbCosmo from '../libs';
 import { CustomError } from '../helper/customError';
 import { objectHelper } from '../helper/objectHelper';
+import { formatHelper } from '../helper/formatHelper';
 
 class StoreServices {
   async save(store: ICreateStore, img: Buffer) {
@@ -43,6 +44,7 @@ class StoreServices {
               close: true,
               relDayWeekOperation: {
                 select: {
+                  id: true,
                   dayWeek: {
                     select: {
                       day: true,
@@ -59,7 +61,12 @@ class StoreServices {
         ...r,
         password: undefined,
         operation: r.operationHour.map((o) => ({
-          daysWeek: o.relDayWeekOperation.map((w) => w.dayWeek.day),
+          daysWeek: o.relDayWeekOperation.map((w) => {
+            return {
+              id: w.id,
+              day: w.dayWeek.day,
+            };
+          }),
           open: o.open,
           close: o.close,
         })),
@@ -82,6 +89,7 @@ class StoreServices {
               close: true,
               relDayWeekOperation: {
                 select: {
+                  id: true,
                   dayWeek: {
                     select: {
                       day: true,
@@ -98,14 +106,21 @@ class StoreServices {
       const result = {
         ...res,
         operation: res?.operationHour.map((o) => ({
-          daysWeek: o.relDayWeekOperation.map((w) => w.dayWeek.day),
+          daysWeek: o.relDayWeekOperation.map((w) => {
+            return {
+              id: w.id,
+              day: w.dayWeek.day,
+            };
+          }),
           open: o.open,
           close: o.close,
         })),
         operationHour: undefined,
       };
+
       return objectHelper.omit(result, 'password');
     } catch (error) {
+      console.log(error);
       throw new CustomError(`erro ao tentar buscar a loja.`, 400);
     }
   }
@@ -120,9 +135,11 @@ class StoreServices {
       throw new CustomError(`erro ao tentar buscar a loja.`, 400);
     }
   }
-  async update(store: IUpdateStore, id: number) {
+  async update(store: IUpdateStore, storeId: number) {
     try {
-      const existStore = await dbCosmo.store.findUnique({ where: { id } });
+      const existStore = await dbCosmo.store.findUnique({
+        where: { id: Number(storeId) },
+      });
 
       if (!existStore) {
         throw new CustomError('loja não encontrada.', 404);
@@ -130,11 +147,13 @@ class StoreServices {
 
       const res = await dbCosmo.store.update({
         data: store,
-        where: { id: id },
+        where: { id: Number(storeId) },
       });
 
       return res;
     } catch (error) {
+      console.log(error);
+
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           const key = error.meta?.target as keyof typeof store;
@@ -180,6 +199,102 @@ class StoreServices {
       } else {
         throw new CustomError(`error desconhecido: ${error}`, 500);
       }
+    }
+  }
+  async availableTimes(date: string, itemId: number) {
+    try {
+      const index = new Date(date.split('T')[0]).getDay();
+
+      const dayWeek = await dbCosmo.dayWeek.findFirst({
+        select: {
+          relDayWeekOperation: {
+            orderBy: { operationHour: { open: 'asc' } },
+            select: {
+              operationHour: {
+                select: {
+                  open: true,
+                  close: true,
+                },
+              },
+            },
+          },
+        },
+        where: { index: index === 7 ? 1 : index + 1 },
+      });
+
+      if (
+        dayWeek &&
+        dayWeek.relDayWeekOperation &&
+        dayWeek.relDayWeekOperation.length > 0
+      ) {
+        let listHours = [] as string[];
+
+        for (const operation of dayWeek?.relDayWeekOperation) {
+          const open = +operation.operationHour.open.split(':')[0];
+          const close = +operation.operationHour.close.split(':')[0];
+
+          for (let index = open; index <= close; index++) {
+            listHours.push(`${index.toString().padStart(2, '0')}:00`);
+
+            if (index === close) {
+              listHours.push(`${(index + 1).toString().padStart(2, '0')}:00`);
+            }
+
+            if (index != close) {
+              listHours.push(`${index.toString().padStart(2, '0')}:30`);
+            }
+          }
+        }
+
+        const scheduling = await dbCosmo.scheduling.findMany({
+          where: {
+            AND: [
+              { date: formatHelper.formatDate(date.split('T')[0]) },
+              { itemSchedulable: { id: Number(itemId) } },
+            ],
+          },
+          select: { startTime: true, endTime: true },
+        });
+
+        if (scheduling && scheduling.length > 0) {
+          for (const schedule of scheduling) {
+            const hourStart = schedule.startTime.split('T')[1].substring(0, 5);
+            const hourEnd = schedule.endTime.split('T')[1].substring(0, 5);
+
+            const indexStart = listHours.indexOf(hourStart);
+            const indexEnd = listHours.indexOf(hourEnd);
+
+            const quantRemove = indexEnd - indexStart + 1;
+
+            listHours.splice(indexStart, quantRemove);
+          }
+
+          listHours.pop();
+        }
+
+        return listHours;
+      }
+
+      return [];
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+  async updateImage(storeId: number, img: Buffer) {
+    try {
+      const store = await this.findById(storeId);
+
+      if (!store) {
+        throw new CustomError('loja não encontrada.', 404);
+      }
+
+      await dbCosmo.store.update({
+        data: { img: [img] },
+        where: { id: storeId },
+      });
+    } catch (error) {
+      throw error;
     }
   }
 }

@@ -1,5 +1,4 @@
 import { CustomError } from '../helper/customError';
-import { objectHelper } from '../helper/objectHelper';
 import { ICreateOperationHour } from '../interfaces';
 import dbCosmo from '../libs';
 
@@ -10,17 +9,16 @@ class OperatioServices {
     storeId: number,
   ) {
     try {
-      const res = await dbCosmo.operationHour.create({
-        data: {
-          ...operation,
-          store: { connect: { id: storeId } },
-        },
-      });
-
-      console.log(res);
       const daysWeek = await dbCosmo.dayWeek.findMany();
 
-      for (const indexWeek of daysWeekIndex) {
+      for await (const indexWeek of daysWeekIndex) {
+        const res = await dbCosmo.operationHour.create({
+          data: {
+            ...operation,
+            store: { connect: { id: storeId } },
+          },
+        });
+
         await dbCosmo.relDayWeekOperation.create({
           data: {
             operationHourId: res.id,
@@ -28,6 +26,10 @@ class OperatioServices {
           },
         });
       }
+
+      // for (const indexWeek of daysWeekIndex) {
+
+      // }
 
       return 'horário de funcionamento adicionado.';
     } catch (error) {
@@ -68,6 +70,52 @@ class OperatioServices {
         'houve um erro ao tentar buscar os dias de funcionamento.',
         502,
       );
+    }
+  }
+  async update(relOperationId: number, open: string, close: string) {
+    try {
+      const relOp = await dbCosmo.relDayWeekOperation.findUnique({
+        where: { id: Number(relOperationId) },
+        select: {
+          operationHour: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      if (!relOp || !relOp.operationHour.id) {
+        throw new CustomError('horário não encontrado.', 404);
+      }
+
+      await dbCosmo.operationHour.update({
+        where: { id: Number(relOp.operationHour.id) },
+        data: { open: open, close: close },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+  async delete(relOperationId: number) {
+    try {
+      const relOp = await dbCosmo.relDayWeekOperation.findUnique({
+        where: { id: Number(relOperationId) },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!relOp) {
+        throw new CustomError('horário não encontrado.', 404);
+      }
+
+      await dbCosmo.relDayWeekOperation.delete({
+        where: { id: Number(relOperationId) },
+      });
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
   }
 }

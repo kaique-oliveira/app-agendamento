@@ -112,9 +112,9 @@ class SchedulableItemController {
         throw new CustomError('o id do item é obrigatório.', 409);
       }
 
-      const response = await schedulableItemServices.delete(Number(itemId));
+      await schedulableItemServices.delete(Number(itemId));
 
-      res.status(200).json(response);
+      res.status(200).json({ message: 'Item deletado com sucesso.' });
     } catch (error) {
       const err = error as CustomError;
       res.status(err.statusCode).json({ message: err.message });

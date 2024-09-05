@@ -1,117 +1,70 @@
-import { Container } from '../../components/Container';
-import svgLogin from '../../../public/login-svg.svg';
 import { WrapperForm, WrapperLogin } from './styles';
-import {
-  Button,
-  IconButton,
-  Image,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Link,
-  Text,
-  useToast,
-} from '@chakra-ui/react';
 import { useState } from 'react';
-import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
-import { Link as ReactRouterLink } from 'react-router-dom';
 import { useAuth } from '../../context/auth';
 import { CustomError } from '../../helpers/customError';
+import { WrapperMain } from '../../components/WrapperMain';
+import { InputComponent } from '../../components/InputComponent';
+import { ButtonComponent } from '../../components/ButtonComponent';
+import { useToast } from '../../hooks/useToast';
+import { Spacing } from '../../components/Spacing';
+import { HeaderTitle } from '../../components/HeaderTitle';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 export function Login() {
-  const toast = useToast();
-  const { login } = useAuth();
-
-  const [loading, setLoading] = useState(false);
-  const [show, setShow] = useState(false);
-  const handleClick = () => setShow(!show);
+  const { onShowToast } = useToast();
+  const { login, isLoading, isAuthenticated } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  async function handleValidationLogin() {
+  async function handleLogin() {
     try {
       if (email && password) {
-        setLoading(true);
         await login({ email, password });
       }
     } catch (error) {
       const err = error as CustomError;
-      toast({
-        status: 'success',
-        description: err.message,
-        duration: 3000,
+      onShowToast({
+        text: err.message,
+        status: 'ERROR',
       });
     }
-    setLoading(false);
   }
 
-  return (
-    <Container>
-      <WrapperLogin>
-        <WrapperForm>
-          <Image
-            mb="32px"
-            src={svgLogin}
-            alt="svg login"
-            boxSize="100px"
-            objectFit="cover"
-          />
+  if (isLoading) {
+    return <LoadingComponent />;
+  }
 
-          <Input
-            focusBorderColor="orange.300"
-            size="lg"
-            type="email"
-            placeholder="E-mail"
-            onChange={(e) => setEmail(e.target.value)}
-          />
+  if (!isLoading && !isAuthenticated)
+    return (
+      <WrapperMain>
+        <WrapperLogin>
+          <HeaderTitle>Login</HeaderTitle>
 
-          <InputGroup>
-            <InputRightElement>
-              <IconButton
-                mt="6px"
-                variant="gosht"
-                aria-label="togle-show-password"
-                onClick={handleClick}
-                transition="all .2s"
-                size="sm"
-              >
-                {show ? (
-                  <IoEyeOutline size={20} color="#738197" />
-                ) : (
-                  <IoEyeOffOutline size={20} color="#738197" />
-                )}
-              </IconButton>
-            </InputRightElement>
-            <Input
-              focusBorderColor="orange.300"
-              size="lg"
+          <WrapperForm>
+            <InputComponent
+              type="email"
+              placeholder="E-mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <InputComponent
               type="password"
               placeholder="Senha"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </InputGroup>
 
-          <Button
-            size="lg"
-            mt="32px"
-            w="100%"
-            color="#fff"
-            colorScheme="orange"
-            onClick={handleValidationLogin}
-            isLoading={loading}
-          >
-            Entrar
-          </Button>
+            <Spacing spacing={0} />
 
-          <Text color="#738197">
-            Não tem um conta?{' '}
-            <Link as={ReactRouterLink} to="/create" color="orange.500">
-              Criar
-            </Link>
-          </Text>
-        </WrapperForm>
-      </WrapperLogin>
-    </Container>
-  );
+            <ButtonComponent
+              style={{ width: '90%' }}
+              text="Entrar"
+              onClick={handleLogin}
+            />
+          </WrapperForm>
+        </WrapperLogin>
+      </WrapperMain>
+    );
 }

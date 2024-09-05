@@ -4,31 +4,44 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { CreateCount } from './pages/CreateCount';
 import { PrivateRoute } from './components/PrivateRoute';
-import { Item } from './pages/Item';
 import { Setting } from './pages/Setting';
-import { Scheduling } from './pages/Scheduling';
+import { ThemeProvider } from 'styled-components';
+import theme from './theme';
+import { StoreProvider } from './context/store.context';
+import { LoadingProvider } from './context/loading.context';
+import { ToastProvider } from './context/toast.context';
+import { DialogProvider } from './context/dialog.context';
 
 export function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/create" element={<CreateCount />} />
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <LoadingProvider>
+          <ToastProvider>
+            <DialogProvider>
+              <AuthProvider>
+                <StoreProvider>
+                  <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/create" element={<CreateCount />} />
 
-          {/* private */}
-          <Route path="/" element={<PrivateRoute element={<Home />} />} />
-          <Route path="/items" element={<PrivateRoute element={<Item />} />} />
-          <Route
-            path="/scheduling"
-            element={<PrivateRoute element={<Scheduling />} />}
-          />
-          <Route
-            path="/settings"
-            element={<PrivateRoute element={<Setting />} />}
-          />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+                    {/* private */}
+                    <Route
+                      path="/"
+                      element={<PrivateRoute element={<Home />} />}
+                    />
+
+                    <Route
+                      path="/settings"
+                      element={<PrivateRoute element={<Setting />} />}
+                    />
+                  </Routes>
+                </StoreProvider>
+              </AuthProvider>
+            </DialogProvider>
+          </ToastProvider>
+        </LoadingProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

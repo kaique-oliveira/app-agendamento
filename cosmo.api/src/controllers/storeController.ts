@@ -12,7 +12,6 @@ const updateSchema = z.object({
   cnpj: z
     .string({ message: 'O CNPJ deve ser um texto.' })
     .min(4, { message: 'O CNPJ é um campo obrigatório.' }),
-  imgUrl: z.string().nullable(),
   email: z
     .string()
     .email({ message: 'O e-mail está inválido.' })
@@ -41,18 +40,12 @@ const createSchema = z.object({
     .min(8, { message: 'A senha é um campo obrigatório.' }),
 });
 
-interface UploadRequest extends Request {
-  body: {
-    name: string;
-    cnpj: string;
-    email: string;
-    senha: string;
-  };
-  img: {
-    buffer: Buffer;
-    originalname: string;
-  };
-}
+const editImageSchema = z.object({
+  img: z.object({
+    buffer: z.instanceof(Buffer),
+    originalname: z.string(),
+  }),
+});
 
 class StoreController {
   async postStore(req: Request, res: Response) {
@@ -131,17 +124,6 @@ class StoreController {
         throw validation.error;
       }
 
-      if (validation.data.imgUrl) {
-        const isUrl = z
-          .string()
-          .url({ message: 'URL da imagem inválida.' })
-          .safeParse(validation.data.imgUrl);
-
-        if (isUrl.error) {
-          throw isUrl.error;
-        }
-      }
-
       const response = await storeServices.update(validation.data, Number(id));
 
       res.status(200).json(response);
@@ -167,6 +149,38 @@ class StoreController {
       const response = await storeServices.delete(Number(id));
 
       res.status(200).json(response);
+    } catch (error) {
+      const err = error as CustomError;
+      res.status(err.statusCode).json({ message: err.message });
+    }
+  }
+  async availableTime(
+    req: Request<{}, {}, {}, { date: string; itemId: number }>,
+    res: Response,
+  ) {
+    try {
+      const { date, itemId } = req.query;
+
+      const retorn = await storeServices.availableTimes(date, itemId);
+
+      res.status(200).json(retorn);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  }
+  async editImage(req: Request, res: Response) {
+    try {
+      const file = req.file?.buffer;
+
+      const { storeId } = req.query;
+
+      if (!storeId) {
+        throw new CustomError('o id é obrigatório.', 409);
+      }
+
+      await storeServices.updateImage(Number(storeId), file!);
+
+      res.status(200).json({ message: 'Imagem editada com sucesso.' });
     } catch (error) {
       const err = error as CustomError;
       res.status(err.statusCode).json({ message: err.message });

@@ -1,20 +1,52 @@
 class Format {
-  cpnj(cnpj: string | number) {
-    let cnpjStr = typeof cnpj === 'number' ? cnpj.toString() : cnpj;
+  cnpj(value: number | string) {
+    let cnpj = String(value);
 
-    // Remove todos os caracteres não numéricos
-    cnpjStr = cnpjStr.replace(/\D/g, '');
+    cnpj = cnpj.replace(/\D/g, '');
 
-    // Verifica se o CNPJ tem 14 dígitos
-    if (cnpjStr.length !== 14) {
-      throw new Error('CNPJ deve ter 14 dígitos.');
+    if (cnpj.length <= 14) {
+      return cnpj
+        .replace(/^(\d{2})(\d)/, '$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/\.(\d{3})(\d)/, '.$1/$2')
+        .replace(/(\d{4})(\d)/, '$1-$2');
     }
 
-    // Formata o CNPJ
-    return cnpjStr.replace(
-      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-      '$1.$2.$3/$4-$5'
-    );
+    return cnpj.substring(0, 18);
+  }
+  dataScheduled(date: Date) {
+    return `${date
+      .toLocaleDateString('pt-BR', {
+        weekday: 'short',
+        day: '2-digit',
+      })
+      .replace('.', '')} ${date.toLocaleDateString('pt-BR', {
+      month: 'short',
+    })}`.replace('.', '');
+  }
+  dataScheduledFull(date: Date) {
+    return `${date
+      .toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        day: '2-digit',
+      })
+      .replace('.', '')} ${date.toLocaleDateString('pt-BR', {
+      month: 'long',
+    })}`.replace('.', '');
+  }
+  hourScheduled(date: string) {
+    return date.split('T')[1].substring(0, 5);
+  }
+  cep(value: string | number): string {
+    let cep = String(value);
+
+    cep = cep.replace(/\D/g, '');
+
+    if (cep.length <= 8) {
+      return cep.replace(/^(\d{5})(\d)/, '$1-$2');
+    }
+
+    return cep.substring(0, 9);
   }
 }
 

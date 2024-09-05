@@ -15,7 +15,7 @@ const createSchema = z.object({
     .string({
       message: 'bairro deve ser um texto',
     })
-    .min(10, { message: 'bairro é um campo obrigatório.' }),
+    .min(4, { message: 'bairro é um campo obrigatório.' }),
   zipCode: z
     .number({
       message: 'cep deve ser um número.',

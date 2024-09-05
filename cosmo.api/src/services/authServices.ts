@@ -12,12 +12,12 @@ class AuthServices {
       const store = await dbCosmo.store.findUnique({ where: { email } });
 
       if (!store) {
-        throw new CustomError('e-mail não encontrado.', 404);
+        throw new CustomError('e-mail não encontrado.', 409);
       }
       const pass = await cryptHelper.compare(password, store.password);
 
       if (!pass) {
-        throw new CustomError('senha inválida.', 404);
+        throw new CustomError('senha inválida.', 409);
       }
 
       const token = await authHelper.createToken(store);

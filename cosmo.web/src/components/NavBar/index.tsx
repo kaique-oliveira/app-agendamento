@@ -1,23 +1,18 @@
-import {
-  Avatar,
-  Box,
-  HStack,
-  IconButton,
-  Text,
-  VStack,
-} from '@chakra-ui/react';
+import { Avatar } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Calendar2,
-  Category,
-  HambergerMenu,
-  Home2,
-  Setting2,
-} from 'iconsax-react';
+
+import { Calendar2, HambergerMenu, Setting2 } from 'iconsax-react';
 import { resolveImage } from '../../helpers/resolveImage';
 import { useAuth } from '../../context/auth';
-import { format } from '../../helpers/format';
+import { useTheme } from 'styled-components';
+import {
+  BtnNav,
+  BtnNavContent,
+  BtnResizeNavBar,
+  TitleBtn,
+  WrapperMenu,
+  WrapperNavBar,
+} from './styles';
 
 type NavBarType = {
   isResize: boolean;
@@ -25,6 +20,8 @@ type NavBarType = {
 };
 
 export function NavBar({ isResize, onResize }: NavBarType) {
+  const { COLORS } = useTheme();
+
   const [currentPath, setCurrentPath] = useState(location.pathname);
   const { user } = useAuth();
   const [urlImage, setUrlImage] = useState('');
@@ -42,144 +39,92 @@ export function NavBar({ isResize, onResize }: NavBarType) {
   }, [location.pathname]);
 
   return (
-    <VStack
-      height="100%"
-      w={'max-content'}
-      alignItems="flex-start"
-      justifyContent="space-between"
-      transition="all .1s"
-      ml="8px"
-      bg="#F6F6F6"
-    >
-      <VStack height="100%" w={'max-content'} alignItems="flex-start">
-        <IconButton
-          p="4px 8px"
-          ml="-4px"
+    <WrapperNavBar $isBig={isResize}>
+      <WrapperMenu>
+        <BtnResizeNavBar
           size="sm"
           aria-label="menu-resize"
           variant="gosht"
           onClick={onResize}
         >
-          <HambergerMenu size="22" color="#555555" />
-        </IconButton>
+          <HambergerMenu size="22" color={COLORS.GRAY_200} />
+        </BtnResizeNavBar>
 
-        <HStack minW="100%">
-          <Link to={'/'}>
-            <Box
-              p="4px 8px"
-              borderRadius="8px"
-              minW={!isResize ? '132px' : '100%'}
-              transition="all .1s"
+        <BtnNav to={'/'}>
+          <BtnNavContent
+            $isBig={isResize}
+            color={currentPath === '/' ? COLORS.ACCENT_300 : COLORS.GRAY_200}
+          >
+            <Calendar2
+              size={18}
+              variant={currentPath === '/' ? 'Bold' : 'Linear'}
+            />
+
+            <TitleBtn
+              $isBig={isResize}
+              color={currentPath === '/' ? COLORS.ACCENT_300 : COLORS.GRAY_200}
             >
-              <HStack
-                color={currentPath === '/' ? '#582ce9' : '#555555'}
-                transition="all .1s"
-                alignItems="center"
-                maxH="33px"
-                minH="24px"
-              >
-                <Home2 size="16" variant="Bold" />
+              Agenda
+            </TitleBtn>
+          </BtnNavContent>
+        </BtnNav>
 
-                {!isResize && (
-                  <Text fontSize="13px" fontWeight={700}>
-                    Dashboard
-                  </Text>
-                )}
-              </HStack>
-            </Box>
-          </Link>
-        </HStack>
+        {/* <BtnNav to={'/items'}>
+          <BtnNavContent
+            $isBig={isResize}
+            color={
+              currentPath === '/items' ? COLORS.ACCENT_300 : COLORS.GRAY_200
+            }
+          >
+            <Category
+              size={18}
+              variant={currentPath === '/items' ? 'Bold' : 'Linear'}
+            />
 
-        <HStack minH="33px" maxH="33px" minW="100%">
-          <Link to={'/items'}>
-            <Box
-              p="4px 8px"
-              borderRadius="8px"
-              minW={!isResize ? '132px' : '100%'}
-              transition="all .1s"
+            <TitleBtn
+              $isBig={isResize}
+              color={
+                currentPath === '/items' ? COLORS.ACCENT_300 : COLORS.GRAY_200
+              }
             >
-              <HStack
-                color={currentPath === '/items' ? '#582ce9' : '#555555'}
-                transition="all .1s"
-                maxH="33px"
-                minH="24px"
-              >
-                <Category variant="Bold" size="16" />
-                {!isResize && (
-                  <Text fontSize="13px" fontWeight={700}>
-                    Itens
-                  </Text>
-                )}
-              </HStack>
-            </Box>
-          </Link>
-        </HStack>
+              Itens
+            </TitleBtn>
+          </BtnNavContent>
+        </BtnNav> */}
 
-        <HStack minH="33px" maxH="33px" minW="100%">
-          <Link to={'/scheduling'}>
-            <Box
-              p="4px 8px"
-              borderRadius="8px"
-              minW={!isResize ? '132px' : '100%'}
-              maxH="33px"
-              transition="all .1s"
+        <BtnNav to={'/settings'}>
+          <BtnNavContent
+            $isBig={isResize}
+            color={
+              currentPath === '/settings' ? COLORS.ACCENT_300 : COLORS.GRAY_200
+            }
+          >
+            <Setting2
+              size={18}
+              variant={currentPath === '/settings' ? 'Bold' : 'Linear'}
+            />
+
+            <TitleBtn
+              $isBig={isResize}
+              color={
+                currentPath === '/settings'
+                  ? COLORS.ACCENT_300
+                  : COLORS.GRAY_200
+              }
             >
-              <HStack
-                color={currentPath === '/scheduling' ? '#582ce9' : '#555555'}
-                transition="all .1s"
-                maxH="33px"
-                minH="24px"
-              >
-                <Calendar2 variant="Bold" size="17" />
-                {!isResize && (
-                  <Text fontSize="13px" fontWeight={700}>
-                    Agenda
-                  </Text>
-                )}
-              </HStack>
-            </Box>
-          </Link>
-        </HStack>
+              Ajustes
+            </TitleBtn>
+          </BtnNavContent>
+        </BtnNav>
+      </WrapperMenu>
 
-        <HStack minH="33px" maxH="33px" minW="100%">
-          <Link to={'/settings'}>
-            <Box
-              p="4px 8px"
-              borderRadius="8px"
-              minW={!isResize ? '132px' : '100%'}
-              transition="all .1s"
-            >
-              <HStack
-                color={currentPath === '/settings' ? '#582ce9' : '#555555'}
-                transition="all .1s"
-                maxH="33px"
-                minH="24px"
-              >
-                <Setting2 variant="Bold" size="17" />
-                {!isResize && (
-                  <Text fontSize="13px" fontWeight={700}>
-                    Loja
-                  </Text>
-                )}
-              </HStack>
-            </Box>
-          </Link>
-        </HStack>
-      </VStack>
-
-      <HStack>
-        <Avatar w="32px" h="32px" name={user?.name} src={urlImage} />
-        {!isResize && (
-          <VStack w="max-content" gap="0px" alignItems="flex-start">
-            <Text fontSize="11px" fontWeight={600} color="#555555">
-              {user?.name}
-            </Text>
-            <Text fontSize="11px" fontWeight={400} color="#555555">
-              {format.cpnj(Number(user?.cnpj))}
-            </Text>
-          </VStack>
-        )}
-      </HStack>
-    </VStack>
+      <Avatar
+        alignSelf="flex-start"
+        w="32px"
+        h="32px"
+        name={user?.name}
+        src={urlImage}
+      />
+    </WrapperNavBar>
   );
 }

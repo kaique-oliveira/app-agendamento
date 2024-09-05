@@ -6,10 +6,10 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { useToast } from '@chakra-ui/react';
 import { api } from '../libs/api';
 import { CustomError } from '../helpers/customError';
 import { IUser } from '../Interfaces';
+import { useToast } from '../hooks/useToast';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -21,6 +21,7 @@ interface AuthContextType {
   validateToken(value: string): Promise<boolean>;
   titlePage: string;
   setTitlePage(value: string): void;
+  setUser(user: IUser | null): void;
 }
 
 export interface ICredentials {
@@ -40,7 +41,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactElement }) => {
   const navigate = useNavigate();
-  const toast = useToast();
+  const { onShowToast } = useToast();
   const location = useLocation();
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -53,17 +54,13 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
     try {
       setIsLoading(true);
       const res = await api.post('/auth/login', credentiasl);
-      const { name } = res.data.name as IUser;
 
       setTimeout(() => {
         setIsLoading(false);
 
-        toast({
-          title: 'Sucesso',
-          status: 'success',
-          description: `Bem vindo, ${name}`,
-          duration: 3000,
-          isClosable: true,
+        onShowToast({
+          status: 'SUCCESS',
+          text: `Bem vindo ${res.data.name}`,
         });
 
         window.localStorage.setItem('token', res.data.token);
@@ -73,25 +70,12 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
         setIsAuthenticated(true);
       }, 200);
     } catch (error) {
-      if (JSON.stringify(error).includes('Axios')) {
-        toast({
-          title: 'Atenção',
-          status: 'error',
-          description: 'erro ao tentar se comunicar com a servidor.',
-          duration: 3000,
-          isClosable: true,
-        });
-      } else {
-        const errCustom = error as CustomError;
+      const errCustom = error as CustomError;
 
-        toast({
-          title: 'Atenção',
-          status: 'error',
-          description: `${errCustom.message}`,
-          duration: 3000,
-          isClosable: true,
-        });
-      }
+      onShowToast({
+        status: 'ERROR',
+        text: `${errCustom.message}`,
+      });
 
       setIsAuthenticated(false);
       localStorage.removeItem('token');
@@ -108,6 +92,8 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
   };
 
   const validateToken = async (token: string) => {
+    setIsLoading(true);
+
     const response = await api.post('/auth/token-is-valid', { token: token });
     let tokenIsValid = false;
 
@@ -131,6 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
       localStorage.removeItem('token');
     }
 
+    setIsLoading(false);
     return tokenIsValid;
   };
 
@@ -145,14 +132,17 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
   }, []);
 
   useEffect(() => {
-    console.log(currentPath);
-    if (!isAuthenticated && !currentPath.includes('/signup')) {
+    if (!isAuthenticated && !currentPath.includes('/create')) {
+      navigate('/login');
+    }
+
+    if (!isAuthenticated && !currentPath.includes('/create')) {
       navigate('/login');
     }
 
     if (
       isAuthenticated &&
-      (!currentPath.includes('/login') || !currentPath.includes('/signup'))
+      (!currentPath.includes('/login') || !currentPath.includes('/create'))
     ) {
       navigate(currentPath);
     }
@@ -160,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
     if (
       isAuthenticated &&
       (currentPath.includes('/login') ||
-        currentPath.includes('/signup') ||
+        currentPath.includes('/create') ||
         currentPath === '/')
     ) {
       navigate('/');
@@ -179,6 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
         validateToken,
         titlePage,
         setTitlePage,
+        setUser,
       }}
     >
       {children}

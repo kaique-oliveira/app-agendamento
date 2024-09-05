@@ -20,6 +20,20 @@ const createSchema = z.object({
     .min(1, { message: 'deve conter ao menos um id do dia da semana.' }),
 });
 
+const updateSchema = z.object({
+  open: z
+    .string({
+      message: 'horário de abertura deve ser um texto',
+    })
+    .min(5, { message: 'horário de abertura é um campo obrigatório.' }),
+  close: z
+    .string({
+      message: 'horário de fechamento deve ser um texto',
+    })
+    .min(5, { message: 'horário de fechamento é um campo obrigatório.' }),
+  relOperationId: z.number(),
+});
+
 class OperationController {
   async postOperation(req: Request, res: Response) {
     try {
@@ -58,6 +72,47 @@ class OperationController {
       const reponse = await operationServices.findAll();
 
       res.status(200).json(reponse);
+    } catch (error) {
+      const err = error as CustomError;
+
+      res.status(err.statusCode).json({ message: err.message });
+    }
+  }
+  async updateOperation(req: Request, res: Response) {
+    try {
+      const validation = updateSchema.safeParse(req.body);
+
+      if (validation.error) {
+        throw validation.error;
+      }
+
+      const reponse = await operationServices.update(
+        validation.data.relOperationId,
+        validation.data.open,
+        validation.data.close,
+      );
+
+      res.status(200).json({ message: 'Horário alterado com sucesso.' });
+    } catch (error) {
+      const err = error as CustomError;
+
+      res.status(err.statusCode).json({ message: err.message });
+    }
+  }
+  async deleteOperation(
+    req: Request<{}, {}, {}, { relOperationId: number }>,
+    res: Response,
+  ) {
+    try {
+      const { relOperationId } = req.query;
+
+      if (!relOperationId) {
+        throw new CustomError('o id da relação do horário é obrigatório', 409);
+      }
+
+      const reponse = await operationServices.delete(relOperationId);
+
+      res.status(200).json({ message: 'Horário deletado com sucesso.' });
     } catch (error) {
       const err = error as CustomError;
 

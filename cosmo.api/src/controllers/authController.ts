@@ -22,11 +22,11 @@ class AuthController {
       const { email, password } = req.body;
 
       if (!email) {
-        throw new CustomError('e-mail é obrigatório.', 400);
+        return res.status(409).json({ message: 'e-mail é obrigatório.' });
       }
 
       if (!password) {
-        throw new CustomError('senha é obrigatório.', 400);
+        return res.status(409).json({ message: 'senha é obrigatório.' });
       }
 
       const response = await authServices.login(email, password);

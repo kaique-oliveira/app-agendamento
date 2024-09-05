@@ -14,9 +14,17 @@ class SchedulableItemsServices {
   }
   async findAllItems() {
     try {
-      const res = await dbCosmo.schedulableItem.findMany();
+      const res = await dbCosmo.schedulableItem.findMany({
+        include: { Scheduling: true },
+      });
 
-      return res;
+      return res.map((item) => {
+        return {
+          ...item,
+          scheduling: item.Scheduling,
+          Scheduling: undefined,
+        };
+      });
     } catch (error) {
       throw new CustomError('erro ao tentar buscar os itens.', 502);
     }
@@ -50,6 +58,12 @@ class SchedulableItemsServices {
   }
   async delete(itemId: number) {
     try {
+      await dbCosmo.scheduling.deleteMany({
+        where: {
+          itemSchedulableId: itemId,
+        },
+      });
+
       const res = await dbCosmo.schedulableItem.delete({
         where: { id: itemId },
       });
