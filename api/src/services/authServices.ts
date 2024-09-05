@@ -2,14 +2,14 @@ import { date } from 'zod';
 import { authHelper } from '../helper/authHelper';
 import { cryptHelper } from '../helper/cryptHelper';
 import { CustomError } from '../helper/customError';
-import dbCosmo from '../libs';
+import dbAgendamento from '../libs';
 import { storeServices } from './storeServices';
 import { objectHelper } from '../helper/objectHelper';
 
 class AuthServices {
   async login(email: string, password: string) {
     try {
-      const store = await dbCosmo.store.findUnique({ where: { email } });
+      const store = await dbAgendamento.store.findUnique({ where: { email } });
 
       if (!store) {
         throw new CustomError('e-mail não encontrado.', 409);
@@ -52,7 +52,7 @@ class AuthServices {
 
       store.password = await cryptHelper.encrypt(newPassword);
 
-      await dbCosmo.store.update({
+      await dbAgendamento.store.update({
         data: objectHelper.omit(store, 'id'),
         where: { id: store.id },
       });

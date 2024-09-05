@@ -1,6 +1,6 @@
 import { CustomError } from '../helper/customError';
 import { ICreateOperationHour } from '../interfaces';
-import dbCosmo from '../libs';
+import dbAgendamento from '../libs';
 
 class OperatioServices {
   async save(
@@ -9,17 +9,17 @@ class OperatioServices {
     storeId: number,
   ) {
     try {
-      const daysWeek = await dbCosmo.dayWeek.findMany();
+      const daysWeek = await dbAgendamento.dayWeek.findMany();
 
       for await (const indexWeek of daysWeekIndex) {
-        const res = await dbCosmo.operationHour.create({
+        const res = await dbAgendamento.operationHour.create({
           data: {
             ...operation,
             store: { connect: { id: storeId } },
           },
         });
 
-        await dbCosmo.relDayWeekOperation.create({
+        await dbAgendamento.relDayWeekOperation.create({
           data: {
             operationHourId: res.id,
             dayWeekId: daysWeek.find((x) => x.index === indexWeek)!.id,
@@ -39,7 +39,7 @@ class OperatioServices {
   }
   async findAll() {
     try {
-      const res = await dbCosmo.dayWeek.findMany({
+      const res = await dbAgendamento.dayWeek.findMany({
         include: {
           relDayWeekOperation: {
             select: {
@@ -74,7 +74,7 @@ class OperatioServices {
   }
   async update(relOperationId: number, open: string, close: string) {
     try {
-      const relOp = await dbCosmo.relDayWeekOperation.findUnique({
+      const relOp = await dbAgendamento.relDayWeekOperation.findUnique({
         where: { id: Number(relOperationId) },
         select: {
           operationHour: {
@@ -89,7 +89,7 @@ class OperatioServices {
         throw new CustomError('horário não encontrado.', 404);
       }
 
-      await dbCosmo.operationHour.update({
+      await dbAgendamento.operationHour.update({
         where: { id: Number(relOp.operationHour.id) },
         data: { open: open, close: close },
       });
@@ -99,7 +99,7 @@ class OperatioServices {
   }
   async delete(relOperationId: number) {
     try {
-      const relOp = await dbCosmo.relDayWeekOperation.findUnique({
+      const relOp = await dbAgendamento.relDayWeekOperation.findUnique({
         where: { id: Number(relOperationId) },
         select: {
           id: true,
@@ -110,7 +110,7 @@ class OperatioServices {
         throw new CustomError('horário não encontrado.', 404);
       }
 
-      await dbCosmo.relDayWeekOperation.delete({
+      await dbAgendamento.relDayWeekOperation.delete({
         where: { id: Number(relOperationId) },
       });
     } catch (error) {

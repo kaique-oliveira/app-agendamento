@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { cryptHelper } from '../helper/cryptHelper';
 import { ICreateStore, ISelectStore, IUpdateStore } from '../interfaces';
-import dbCosmo from '../libs';
+import dbAgendamento from '../libs';
 import { CustomError } from '../helper/customError';
 import { objectHelper } from '../helper/objectHelper';
 import { formatHelper } from '../helper/formatHelper';
@@ -12,7 +12,7 @@ class StoreServices {
       store.password = await cryptHelper.encrypt(store.password);
 
       store.img = [img];
-      const res = await dbCosmo.store.create({ data: store });
+      const res = await dbAgendamento.store.create({ data: store });
 
       return res;
     } catch (error) {
@@ -34,7 +34,7 @@ class StoreServices {
   }
   async findAll() {
     try {
-      const res = await dbCosmo.store.findMany({
+      const res = await dbAgendamento.store.findMany({
         orderBy: { name: 'asc' },
         include: {
           address: true,
@@ -80,7 +80,7 @@ class StoreServices {
   }
   async findByEmail(email: string) {
     try {
-      const res = await dbCosmo.store.findUnique({
+      const res = await dbAgendamento.store.findUnique({
         include: {
           address: true,
           operationHour: {
@@ -126,7 +126,7 @@ class StoreServices {
   }
   async findById(id: number) {
     try {
-      const res = (await dbCosmo.store.findUnique({
+      const res = (await dbAgendamento.store.findUnique({
         where: { id },
       })) as ISelectStore;
 
@@ -137,7 +137,7 @@ class StoreServices {
   }
   async update(store: IUpdateStore, storeId: number) {
     try {
-      const existStore = await dbCosmo.store.findUnique({
+      const existStore = await dbAgendamento.store.findUnique({
         where: { id: Number(storeId) },
       });
 
@@ -145,7 +145,7 @@ class StoreServices {
         throw new CustomError('loja não encontrada.', 404);
       }
 
-      const res = await dbCosmo.store.update({
+      const res = await dbAgendamento.store.update({
         data: store,
         where: { id: Number(storeId) },
       });
@@ -179,13 +179,15 @@ class StoreServices {
   }
   async delete(id: number) {
     try {
-      const existStore = await dbCosmo.store.findUnique({ where: { id } });
+      const existStore = await dbAgendamento.store.findUnique({
+        where: { id },
+      });
 
       if (!existStore) {
         throw new CustomError('loja não encontrada.', 404);
       }
 
-      await dbCosmo.store.delete({ where: { id } });
+      await dbAgendamento.store.delete({ where: { id } });
 
       return { message: 'loja deletada.' };
     } catch (error) {
@@ -205,7 +207,7 @@ class StoreServices {
     try {
       const index = new Date(date.split('T')[0]).getDay();
 
-      const dayWeek = await dbCosmo.dayWeek.findFirst({
+      const dayWeek = await dbAgendamento.dayWeek.findFirst({
         select: {
           relDayWeekOperation: {
             orderBy: { operationHour: { open: 'asc' } },
@@ -246,7 +248,7 @@ class StoreServices {
           }
         }
 
-        const scheduling = await dbCosmo.scheduling.findMany({
+        const scheduling = await dbAgendamento.scheduling.findMany({
           where: {
             AND: [
               { date: formatHelper.formatDate(date.split('T')[0]) },
@@ -289,7 +291,7 @@ class StoreServices {
         throw new CustomError('loja não encontrada.', 404);
       }
 
-      await dbCosmo.store.update({
+      await dbAgendamento.store.update({
         data: { img: [img] },
         where: { id: storeId },
       });

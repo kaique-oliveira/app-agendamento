@@ -1,7 +1,7 @@
 import { CustomError } from '../helper/customError';
 import { formatHelper } from '../helper/formatHelper';
 import { ICreateScheduling, IUpdateScheduling } from '../interfaces';
-import dbCosmo from '../libs';
+import dbAgendamento from '../libs';
 
 class SchedulingServices {
   async saveScheduling(scheduling: ICreateScheduling, itemId: number) {
@@ -18,7 +18,7 @@ class SchedulingServices {
           itemId,
         )
       ) {
-        const res = await dbCosmo.scheduling.create({
+        const res = await dbAgendamento.scheduling.create({
           data: {
             ...scheduling,
             itemSchedulable: {
@@ -52,7 +52,7 @@ class SchedulingServices {
         scheduling.endTime as string,
       );
 
-      // const item = dbCosmo.schedulableItem.findUnique({
+      // const item = dbAgendamento.schedulableItem.findUnique({
       //   where: { id: itemId },
       // });
       // scheduling.itemSchedulable = { connect: { id: itemId } };
@@ -65,7 +65,7 @@ class SchedulingServices {
           itemId,
         )
       ) {
-        const res = await dbCosmo.scheduling.update({
+        const res = await dbAgendamento.scheduling.update({
           data: {
             ...scheduling,
             itemSchedulable: {
@@ -96,7 +96,7 @@ class SchedulingServices {
     itemId: number,
   ) {
     try {
-      let schedule = await dbCosmo.scheduling.findFirst({
+      let schedule = await dbAgendamento.scheduling.findFirst({
         where: {
           date: date,
           startTime: {
@@ -113,7 +113,7 @@ class SchedulingServices {
         return false;
       }
 
-      schedule = await dbCosmo.scheduling.findFirst({
+      schedule = await dbAgendamento.scheduling.findFirst({
         where: {
           date: date,
           startTime: {
@@ -130,7 +130,7 @@ class SchedulingServices {
         return false;
       }
 
-      schedule = await dbCosmo.scheduling.findFirst({
+      schedule = await dbAgendamento.scheduling.findFirst({
         where: {
           date: date,
           startTime: {
@@ -152,7 +152,7 @@ class SchedulingServices {
     try {
       const dateF = formatHelper.formatDate(date);
 
-      const schedulings = await dbCosmo.scheduling.findMany({
+      const schedulings = await dbAgendamento.scheduling.findMany({
         where: {
           date: dateF,
         },
@@ -165,7 +165,7 @@ class SchedulingServices {
   }
   async deleteScheduling(id: number) {
     try {
-      await dbCosmo.scheduling.delete({ where: { id: id } });
+      await dbAgendamento.scheduling.delete({ where: { id: id } });
 
       return 'agendamento deletado';
     } catch (error) {

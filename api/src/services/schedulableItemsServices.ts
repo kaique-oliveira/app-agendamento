@@ -1,11 +1,11 @@
 import { CustomError } from '../helper/customError';
 import { ICreateSchedulableItem, IUpdateSchedulableItem } from '../interfaces';
-import dbCosmo from '../libs';
+import dbAgendamento from '../libs';
 
 class SchedulableItemsServices {
   async save(item: ICreateSchedulableItem) {
     try {
-      const res = await dbCosmo.schedulableItem.create({ data: item });
+      const res = await dbAgendamento.schedulableItem.create({ data: item });
 
       return res;
     } catch (error) {
@@ -14,7 +14,7 @@ class SchedulableItemsServices {
   }
   async findAllItems() {
     try {
-      const res = await dbCosmo.schedulableItem.findMany({
+      const res = await dbAgendamento.schedulableItem.findMany({
         include: { Scheduling: true },
       });
 
@@ -31,7 +31,7 @@ class SchedulableItemsServices {
   }
   async findOneItem(itemId: number) {
     try {
-      const res = await dbCosmo.schedulableItem.findUnique({
+      const res = await dbAgendamento.schedulableItem.findUnique({
         where: { id: itemId },
       });
 
@@ -46,7 +46,7 @@ class SchedulableItemsServices {
   }
   async update(item: IUpdateSchedulableItem, itemId: number) {
     try {
-      const res = await dbCosmo.schedulableItem.update({
+      const res = await dbAgendamento.schedulableItem.update({
         data: item,
         where: { id: itemId },
       });
@@ -58,13 +58,13 @@ class SchedulableItemsServices {
   }
   async delete(itemId: number) {
     try {
-      await dbCosmo.scheduling.deleteMany({
+      await dbAgendamento.scheduling.deleteMany({
         where: {
           itemSchedulableId: itemId,
         },
       });
 
-      const res = await dbCosmo.schedulableItem.delete({
+      const res = await dbAgendamento.schedulableItem.delete({
         where: { id: itemId },
       });
 

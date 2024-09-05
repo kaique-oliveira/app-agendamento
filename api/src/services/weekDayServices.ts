@@ -1,9 +1,9 @@
-import dbCosmo from '../libs';
+import dbAgendamento from '../libs';
 
 class WeekDayServices {
   async getAll() {
     try {
-      const res = await dbCosmo.dayWeek.findMany({
+      const res = await dbAgendamento.dayWeek.findMany({
         select: {
           id: true,
           day: true,

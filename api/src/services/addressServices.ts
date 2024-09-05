@@ -1,11 +1,11 @@
 import { CustomError } from '../helper/customError';
 import { ICreateAddress, ISelectAddress, IUpdateAddress } from '../interfaces';
-import dbCosmo from '../libs';
+import dbAgendamento from '../libs';
 
 class AddressServices {
   async save(address: ICreateAddress, storeId: number) {
     try {
-      const res = await dbCosmo.address.create({
+      const res = await dbAgendamento.address.create({
         data: {
           ...address,
           store: {
@@ -23,7 +23,7 @@ class AddressServices {
   }
   async update(address: IUpdateAddress, id: number) {
     try {
-      const res = await dbCosmo.address.update({
+      const res = await dbAgendamento.address.update({
         data: address,
         where: { id },
       });
@@ -35,7 +35,7 @@ class AddressServices {
   }
   async findById(id: number) {
     try {
-      const res = (await dbCosmo.address.findUnique({
+      const res = (await dbAgendamento.address.findUnique({
         where: { id },
       })) as ISelectAddress;
 

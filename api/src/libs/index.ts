@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 
-const dbCosmo = new PrismaClient();
+const dbAgendamento = new PrismaClient();
 
-export default dbCosmo;
+export default dbAgendamento;
