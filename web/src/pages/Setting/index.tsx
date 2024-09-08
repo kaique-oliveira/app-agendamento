@@ -78,6 +78,8 @@ export function Setting() {
   const [weekDays, setWeekDays] = useState<Option[]>([]);
 
   const [urlImage, setUrlImage] = useState('');
+
+  //operations
   const [openModal, setOpenModal] = useState(false);
   const [hourOpen, setHourOpen] = useState<Option | null>(null);
   const [hourClose, setHourClose] = useState<Option | null>(null);
@@ -454,6 +456,22 @@ export function Setting() {
       }
     }
   }, [store, items]);
+
+  useEffect(() => {
+    if (!openModalNewItem) {
+      setNameItem('');
+      setDescriptionItem('');
+      setFeatures([]);
+    }
+  }, [openModalNewItem]);
+
+  useEffect(() => {
+    if (!openModal) {
+      setHourOpen(null);
+      setHourClose(null);
+      setArrayWeekDays([]);
+    }
+  }, [openModal]);
 
   return (
     <WrapperPage>

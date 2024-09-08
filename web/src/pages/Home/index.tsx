@@ -151,6 +151,15 @@ export function Home() {
     }
   }, [items]);
 
+  useEffect(() => {
+    if (!toggleOpenModal) {
+      setCurrentItem(null);
+      setHourStart(null);
+      setHourEnd(null);
+      setNameOwner('');
+    }
+  }, [toggleOpenModal]);
+
   return (
     <WrapperPage>
       <HeaderTitle>Agenda</HeaderTitle>
