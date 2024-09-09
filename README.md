@@ -36,6 +36,9 @@ Esses recursos combinados tornam a aplicação ideal para empresas que precisam 
 Realizei o deploy em um servidor da DigitalOcean.
 
 > Clique no IP para ver o Front-End
+> Login: teste@gmail.com
+> Senha: 123456789
+
 > (<a href="http://[159.89.239.199:3004](http://159.89.239.199:3004)">http://159.89.239.199:3004 </a>)
 
 ## Como usar
