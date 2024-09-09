@@ -7,6 +7,10 @@ Agendamento
 <a href="https://pt-br.react.dev/blog/2023/03/16/introducing-react-dev" target="_blank">React JS</a>
  e <a target="_blank" href="https://nodejs.org/pt">Node JS</a>.</h4>
 
+ <p>Clique na imagem, para visualizar o video no YouTube</p>
+
+[<img src="web/public/youtube.jpg" width="600">](https://youtu.be/zIexZUayF6I 'Assistir ao video')
+
 ## Sobre o projeto
 
 Essa aplicação foi desenvolvida com o propósito de fornecer uma solução completa de gerenciamento para estabelecimentos que necessitam agendar itens e gerenciar seus horários de funcionamento. Ela oferece uma interface amigável para que usuários possam realizar o CRUD (Create, Read, Update, Delete) dos itens disponíveis para agendamento, além de permitir o controle dos horários de operação da empresa.

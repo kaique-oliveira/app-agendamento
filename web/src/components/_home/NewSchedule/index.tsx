@@ -96,6 +96,21 @@ export function NewSchedule({
           onChangeOption={onChangeHourStart}
           options={availableHours
             .filter((_, i) => i !== availableHours.length - 1)
+            .filter((a) => {
+              if (
+                schedulingDate.toLocaleDateString() ===
+                new Date().toLocaleDateString()
+              ) {
+                return (
+                  +new Date().toLocaleTimeString().split(':')[0] <
+                    +a.split(':')[0] &&
+                  +a.split(':')[1] <
+                    +new Date().toLocaleTimeString().split(':')[1]
+                );
+              } else {
+                return a;
+              }
+            })
             .reduce((acc, obj, indice) => {
               acc.push({
                 id: String(indice),
